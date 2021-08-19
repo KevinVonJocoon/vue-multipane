@@ -39,6 +39,9 @@ if (argv.env.entry=='src') {
 
 if (argv.env.entry=='demo') {
 
+  // see https://github.com/JeffreyWay/laravel-mix/issues/960
+  mix.setPublicPath(path.normalize('./demo'));
+
   // Demo files
   mix
     .js('demo/src/main.js', 'demo/main.js')

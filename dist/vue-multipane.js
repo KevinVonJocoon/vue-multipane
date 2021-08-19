@@ -55,7 +55,16 @@ var script = {
         var initialPaneWidth = pane.offsetWidth;
         var initialPaneHeight = pane.offsetHeight;
 
-        var usePercentage = !!(pane.style.width + '').match('%');
+        var usePercentage = (
+          (
+            layout == LAYOUT_VERTICAL &&
+            !!(pane.style.width + '').match('%')
+          ) ||
+          (
+            layout == LAYOUT_HORIZONTAL &&
+            !!(pane.style.height + '').match('%')
+          )
+        );
 
         var addEventListener = window.addEventListener;
         var removeEventListener = window.removeEventListener;
@@ -125,6 +134,37 @@ var script = {
     },
   },
 };
+
+function styleInject(css, ref) {
+  if ( ref === void 0 ) { ref = {}; }
+  var insertAt = ref.insertAt;
+
+  if (!css || typeof document === 'undefined') { return; }
+
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
+
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var css_248z = ".multipane {\n  display: flex;\n}\n.multipane.layout-h {\n  flex-direction: column;\n}\n.multipane.layout-v {\n  flex-direction: row;\n}\n.multipane > div {\n  position: relative;\n  z-index: 1;\n}\n.multipane-resizer {\n  display: block;\n  position: relative;\n  z-index: 2;\n}\n.layout-h > .multipane-resizer {\n  width: 100%;\n  height: 10px;\n  margin-top: -10px;\n  top: 5px;\n  cursor: row-resize;\n}\n.layout-v > .multipane-resizer {\n  width: 10px;\n  height: 100%;\n  margin-left: -10px;\n  left: 5px;\n  cursor: col-resize;\n}";
+
+styleInject(css_248z);
 
 function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier /* server only */, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
     if (typeof shadowMode !== 'boolean') {
@@ -201,62 +241,8 @@ function normalizeComponent(template, style, script, scopeId, isFunctionalTempla
     return script;
 }
 
-var isOldIE = typeof navigator !== 'undefined' &&
-    /msie [6-9]\\b/.test(navigator.userAgent.toLowerCase());
-function createInjector(context) {
-    return function (id, style) { return addStyle(id, style); };
-}
-var HEAD;
-var styles = {};
-function addStyle(id, css) {
-    var group = isOldIE ? css.media || 'default' : id;
-    var style = styles[group] || (styles[group] = { ids: new Set(), styles: [] });
-    if (!style.ids.has(id)) {
-        style.ids.add(id);
-        var code = css.source;
-        if (css.map) {
-            // https://developer.chrome.com/devtools/docs/javascript-debugging
-            // this makes source maps inside style tags work properly in Chrome
-            code += '\n/*# sourceURL=' + css.map.sources[0] + ' */';
-            // http://stackoverflow.com/a/26603875
-            code +=
-                '\n/*# sourceMappingURL=data:application/json;base64,' +
-                    btoa(unescape(encodeURIComponent(JSON.stringify(css.map)))) +
-                    ' */';
-        }
-        if (!style.element) {
-            style.element = document.createElement('style');
-            style.element.type = 'text/css';
-            if (css.media)
-                { style.element.setAttribute('media', css.media); }
-            if (HEAD === undefined) {
-                HEAD = document.head || document.getElementsByTagName('head')[0];
-            }
-            HEAD.appendChild(style.element);
-        }
-        if ('styleSheet' in style.element) {
-            style.styles.push(code);
-            style.element.styleSheet.cssText = style.styles
-                .filter(Boolean)
-                .join('\n');
-        }
-        else {
-            var index = style.ids.size - 1;
-            var textNode = document.createTextNode(code);
-            var nodes = style.element.childNodes;
-            if (nodes[index])
-                { style.element.removeChild(nodes[index]); }
-            if (nodes.length)
-                { style.element.insertBefore(textNode, nodes[index]); }
-            else
-                { style.element.appendChild(textNode); }
-        }
-    }
-}
-
 /* script */
 var __vue_script__ = script;
-
 /* template */
 var __vue_render__ = function() {
   var _vm = this;
@@ -277,11 +263,7 @@ var __vue_staticRenderFns__ = [];
 __vue_render__._withStripped = true;
 
   /* style */
-  var __vue_inject_styles__ = function (inject) {
-    if (!inject) { return }
-    inject("data-v-010c3f16_0", { source: ".multipane {\n  display: flex;\n}\n.multipane.layout-h {\n  flex-direction: column;\n}\n.multipane.layout-v {\n  flex-direction: row;\n}\n.multipane > div {\n  position: relative;\n  z-index: 1;\n}\n.multipane-resizer {\n  display: block;\n  position: relative;\n  z-index: 2;\n}\n.layout-h > .multipane-resizer {\n  width: 100%;\n  height: 10px;\n  margin-top: -10px;\n  top: 5px;\n  cursor: row-resize;\n}\n.layout-v > .multipane-resizer {\n  width: 10px;\n  height: 100%;\n  margin-left: -10px;\n  left: 5px;\n  cursor: col-resize;\n}\n\n/*# sourceMappingURL=multipane.vue.map */", map: {"version":3,"sources":["C:\\Users\\spent\\PhpstormProjects\\vue-multipane\\src\\multipane.vue","multipane.vue"],"names":[],"mappings":"AASA;EACA,aAAA;ACRA;ADUA;EACA,sBAAA;ACRA;ADWA;EACA,mBAAA;ACTA;ADaA;EACA,kBAAA;EACA,UAAA;ACVA;ADaA;EACA,cAAA;EACA,kBAAA;EACA,UAAA;ACVA;ADaA;EACA,WAAA;EACA,YAAA;EACA,iBAAA;EACA,QAAA;EACA,kBAAA;ACVA;ADaA;EACA,WAAA;EACA,YAAA;EACA,kBAAA;EACA,SAAA;EACA,kBAAA;ACVA;;AAEA,wCAAwC","file":"multipane.vue","sourcesContent":["<template>\r\n  <div :class=\"classnames\" :style=\"{ cursor, userSelect }\" @mousedown=\"onMouseDown\">\r\n    <slot></slot>\r\n  </div>\r\n</template>\r\n\r\n<script src=\"./multipane.js\"></script>\r\n\r\n<style lang=\"scss\">\r\n.multipane {\r\n    display: flex;\r\n\r\n    &.layout-h {\r\n        flex-direction: column;\r\n    }\r\n\r\n    &.layout-v {\r\n        flex-direction: row;\r\n    }\r\n}\r\n\r\n.multipane > div {\r\n  position: relative;\r\n  z-index: 1;\r\n}\r\n\r\n.multipane-resizer {\r\n  display: block;\r\n  position: relative;\r\n  z-index: 2;\r\n}\r\n\r\n.layout-h > .multipane-resizer {\r\n  width: 100%;\r\n  height: 10px;\r\n  margin-top: -10px;\r\n  top: 5px;\r\n  cursor: row-resize;\r\n}\r\n\r\n.layout-v > .multipane-resizer {\r\n  width: 10px;\r\n  height: 100%;\r\n  margin-left: -10px;\r\n  left: 5px;\r\n  cursor: col-resize;\r\n}\r\n</style>\r\n",".multipane {\n  display: flex;\n}\n.multipane.layout-h {\n  flex-direction: column;\n}\n.multipane.layout-v {\n  flex-direction: row;\n}\n\n.multipane > div {\n  position: relative;\n  z-index: 1;\n}\n\n.multipane-resizer {\n  display: block;\n  position: relative;\n  z-index: 2;\n}\n\n.layout-h > .multipane-resizer {\n  width: 100%;\n  height: 10px;\n  margin-top: -10px;\n  top: 5px;\n  cursor: row-resize;\n}\n\n.layout-v > .multipane-resizer {\n  width: 10px;\n  height: 100%;\n  margin-left: -10px;\n  left: 5px;\n  cursor: col-resize;\n}\n\n/*# sourceMappingURL=multipane.vue.map */"]}, media: undefined });
-
-  };
+  var __vue_inject_styles__ = undefined;
   /* scoped */
   var __vue_scope_id__ = undefined;
   /* module identifier */
@@ -290,6 +272,7 @@ __vue_render__._withStripped = true;
   var __vue_is_functional_template__ = false;
   /* component normalizer */
   /* style inject */
+  
   /* style inject SSR */
   
   /* style inject shadow dom */
@@ -304,7 +287,7 @@ __vue_render__._withStripped = true;
     __vue_is_functional_template__,
     __vue_module_identifier__,
     false,
-    createInjector,
+    undefined,
     undefined,
     undefined
   );

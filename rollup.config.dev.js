@@ -1,5 +1,6 @@
 import alias from 'rollup-plugin-alias';
 import vue from 'rollup-plugin-vue';
+import postcss from 'rollup-plugin-postcss';
 import buble from 'rollup-plugin-buble';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
@@ -10,15 +11,16 @@ export default {
   output: {
     file: 'dist/vue-multipane.js',
     format: 'umd',
+    sourcemap: false,
   },
-  sourcemaps: true,
   plugins: [
     alias({
       '@': './',
     }),
     vue({
-      css: true,
+      css: false, // Externalize CSS
     }),
+    postcss(), // Handle CSS
     buble(),
     nodeResolve({ browser: true, jsnext: true, main: true }),
     commonjs(),
