@@ -47,7 +47,16 @@ export default {
           offsetHeight: initialPaneHeight,
         } = pane;
 
-        let usePercentage = !!(pane.style.width + '').match('%');
+        let usePercentage = (
+          (
+            layout == LAYOUT_VERTICAL &&
+            !!(pane.style.width + '').match('%')
+          ) ||
+          (
+            layout == LAYOUT_HORIZONTAL &&
+            !!(pane.style.height + '').match('%')
+          )
+        );
 
         const { addEventListener, removeEventListener } = window;
 
